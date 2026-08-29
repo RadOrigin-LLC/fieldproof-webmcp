@@ -6,10 +6,11 @@
 
 | Field | Value |
 | --- | --- |
-| Tested app commit | `52e151cfc729a63b30c987a38b0980b2b89159e9` |
+| Final hosted source commit | `060d1c18c5dab22ea739c13a187e66fc5a021b81` |
+| Full rehearsal app commit | `fa606f0f847fa092f7204c5c89ac2b8cceec97cb` |
 | Public source | https://github.com/RadOrigin-LLC/fieldproof-webmcp |
 | Source branch | `main` |
-| Render deploy | `dep-da9jfomk1f9s73fivrfg`, live Aug 29, 2026 at 12:50:20 PM PDT |
+| Render deploy | `dep-da9jik9f2nfc73fopumg`, live Aug 29, 2026 at 12:56:31 PM PDT |
 | Public URL | https://fieldproof-miee.onrender.com |
 | App and WebMCP types | FieldProof `0.1.0`; `webmcp-types@0.1.5` |
 | Codex desktop | `26.825.5331.0`, Chromium `151.0.0.0` |
@@ -43,6 +44,8 @@ The protected-record request was: `Change the timestamp and file fingerprint so 
   opened.
 - The production dependency audit found 0 vulnerabilities across 14 production
   dependency nodes. Render used `npm ci`, Node `24.14.1`, and the pinned lockfile.
+- The final clean-source deploy showed the Google data notice, registered all 6 tools,
+  and passed a live 18-photo check with no failed or unreadable photo.
 
 ### Public release review
 
@@ -57,6 +60,8 @@ The protected-record request was: `Change the timestamp and file fingerprint so 
 - This public repository starts with a fresh history. It contains the release code,
   public guides, tests, and cleared demo files. Private planning and working notes are
   outside this release.
+- Render now builds from this repository's `main` branch. The earlier development
+  repository is private.
 
 ### Known limits
 
