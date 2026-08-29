@@ -1,0 +1,89 @@
+/* FieldProof design tokens — "The Carbon Copy" (docs/DESIGN.md is the contract)
+   The contractor's triplicate form pad, rebuilt: white original, blueprint ink,
+   carbon record. Mono = machine truth. Safety yellow = capture only.
+   Light is the default — job sites are sunlit. */
+
+:root {
+  /* Paper & ink — light (default) */
+  --paper: #f6f7f8;
+  --paper-raised: #ffffff;
+  --paper-sunken: #eceef0;
+  --ink: #1a2129;
+  --ink-soft: #47525e;
+  --ink-faint: #6b7683;
+  --line: #d4d9de;
+  --line-strong: #aeb6bf;
+
+  /* Blueprint — primary actions, links, headers */
+  --blueprint: #16324f;
+  --blueprint-press: #0f2439;
+  --blueprint-soft: #e3ebf3;
+  --on-blueprint: #ffffff;
+
+  /* Safety yellow — capture affordances ONLY (shutter, capture CTA) */
+  --safety: #facc15;
+  --safety-press: #eab308;
+  --on-safety: #1a2129;
+
+  /* Seal bronze — immutable evidence metadata, the seal motif */
+  --seal: #b45309;
+  --seal-soft: #fdf1e3;
+
+  /* Status */
+  --open: #b45309; /* punch item open */
+  --done: #15803d; /* punch item done / synced */
+  --done-soft: #e9f5ec;
+  --voided: #b91c1c;
+  --voided-soft: #fbeaea;
+  --pending: #6b7683;
+
+  /* Typography */
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  /* Shape & touch */
+  --radius: 8px;
+  --radius-sm: 5px;
+  --tap: 48px;
+  --shutter: 64px;
+
+  --shadow-sheet: 0 -8px 32px rgb(26 33 41 / 0.16);
+}
+
+[data-theme='dark'] {
+  --paper: #14181c;
+  --paper-raised: #1c2127;
+  --paper-sunken: #0f1215;
+  --ink: #eef1f4;
+  --ink-soft: #b3bcc6;
+  --ink-faint: #8a95a1;
+  --line: #2c343d;
+  --line-strong: #47525e;
+
+  --blueprint: #6ba3d6;
+  --blueprint-press: #8db9e2;
+  --blueprint-soft: #1c2b3a;
+  --on-blueprint: #0f1215;
+
+  --safety: #facc15;
+  --safety-press: #fde047;
+  --on-safety: #1a2129;
+
+  --seal: #d97706;
+  --seal-soft: #2a2018;
+
+  --open: #d97706;
+  --done: #4ade80;
+  --done-soft: #16241a;
+  --voided: #f87171;
+  --voided-soft: #2a1717;
+  --pending: #8a95a1;
+
+  --shadow-sheet: 0 -8px 32px rgb(0 0 0 / 0.5);
+}
