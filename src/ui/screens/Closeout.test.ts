@@ -340,6 +340,38 @@ describe('CloseoutView', () => {
     expect(html).toContain('Suggested a proof photo.');
   });
 
+  it('identifies page-button and WebMCP-tool activity in Review history', () => {
+    const html = renderCloseout({
+      phase: 'not-checked',
+      proposals: [],
+      activity: [
+        {
+          id: 'manual-review',
+          projectId: 'project-1',
+          action: 'handoff_review',
+          outcome: 'success',
+          occurredAt: '2026-08-30T16:00:00.000Z',
+          detail: 'Handoff review finished.',
+        },
+        {
+          id: 'webmcp-photo-check',
+          projectId: 'project-1',
+          action: 'verify_project_seals',
+          outcome: 'success',
+          occurredAt: '2026-08-30T16:01:00.000Z',
+          detail: 'Photo check finished.',
+        },
+      ],
+    });
+
+    expect(html).toContain(
+      '<strong>Handoff review</strong><span class="closeout-activity-source">Page button</span>',
+    );
+    expect(html).toContain(
+      '<strong>Photo check</strong><span class="closeout-activity-source">WebMCP tool</span>',
+    );
+  });
+
   it('shows the selected count and one save action', () => {
     const html = renderCloseout({
       phase: 'needs-attention',

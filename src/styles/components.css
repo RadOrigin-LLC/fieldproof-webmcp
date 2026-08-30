@@ -1557,6 +1557,17 @@
 .closeout-activity-row > span {
   display: block;
 }
+.closeout-activity-source {
+  width: fit-content;
+  margin-top: 3px;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--blueprint);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+}
 .proof-photo-list {
   display: grid;
   gap: 8px;

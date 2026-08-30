@@ -66,6 +66,17 @@ const ACTIVITY_LABELS: Record<string, string> = {
   apply_selected_proposals: 'Saved selected updates',
 };
 
+const ACTIVITY_SOURCES: Record<string, string> = {
+  handoff_review: 'Page button',
+  apply_selected_proposals: 'Page button',
+  verify_project_seals: 'WebMCP tool',
+  audit_project_closeout: 'WebMCP tool',
+  stage_photo_link: 'WebMCP tool',
+  stage_daily_log: 'WebMCP tool',
+  open_evidence_packet: 'WebMCP tool',
+  explain_evidence_policy: 'WebMCP tool',
+};
+
 const REVIEW_STEPS: Array<{ key: 'photoCheck' | 'workItems' | 'dailyRecords'; label: string }> = [
   { key: 'photoCheck', label: 'Checking original photos' },
   { key: 'workItems', label: 'Reviewing work items' },
@@ -463,6 +474,9 @@ export function CloseoutView({
               .map((item) => (
                 <div className={`closeout-activity-row outcome-${item.outcome}`} key={item.id}>
                   <strong>{ACTIVITY_LABELS[item.action] ?? item.action.replaceAll('_', ' ')}</strong>
+                  <span className="closeout-activity-source">
+                    {ACTIVITY_SOURCES[item.action] ?? 'Recorded action'}
+                  </span>
                   <span>{projectName}</span>
                   <span>{item.detail}</span>
                   <span className="meta-line">
