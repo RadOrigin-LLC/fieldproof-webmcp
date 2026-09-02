@@ -1,4 +1,5 @@
-import type { CloseoutPhase } from '../../domain/closeout.ts';
+import { useEffect, useRef } from 'react';
+import type { CloseoutPhase, CloseoutProposal } from '../../domain/closeout.ts';
 import type { Photo, Project } from '../../domain/types.ts';
 import {
   filterWorkdays,
@@ -21,11 +22,13 @@ export type WorkdayLedgerProps = {
   photos: readonly Photo[];
   phase: CloseoutPhase;
   checkedAt?: string;
+  passedPhotoCount?: number;
   filter: WorkdayFilter;
   loading: boolean;
   onFilterChange: (filter: WorkdayFilter) => void;
   onOpenWorkday?: (dateKey: string) => void;
   onOpenReview: () => void;
+  onReviewProposal?: (proposalId: string) => void;
   onOpenPacket: () => void;
   onOpenView: (view: SecondaryProjectView) => void;
   onEditProject: () => void;
@@ -70,14 +73,33 @@ function LedgerPhoto({ photo }: { photo: Photo }) {
   );
 }
 
+function LedgerSuggestion({ proposal, photo, target, onReview }: {
+  proposal: CloseoutProposal;
+  photo?: Photo;
+  target: string;
+  onReview?: (proposalId: string) => void;
+}) {
+  return (
+    <div className="ledger-suggestion" id={`suggestion-${proposal.id}`} data-suggestion={proposal.id} tabIndex={-1}>
+      <strong className="ledger-suggestion-label">Suggested</strong>
+      {photo ? <LedgerPhoto photo={photo} /> : null}
+      <p>{proposal.kind === 'daily-log' ? proposal.body : photo?.caption || 'Proof photo'}</p>
+      <button type="button" className="btn btn-secondary" aria-label={`Review suggestion for ${target}`}
+        onClick={() => onReview?.(proposal.id)}>Review</button>
+    </div>
+  );
+}
+
 function WorkdayRow({
   workday,
   photoById,
   onOpen,
+  onReviewProposal,
 }: {
   workday: WorkdayViewModel;
   photoById: ReadonlyMap<string, Photo>;
   onOpen?: () => void;
+  onReviewProposal?: (proposalId: string) => void;
 }) {
   const activePhotos = workday.photos.filter((photo) => !photo.voidedAt);
   const thumbnails = workday.representativePhotoIds.flatMap((id) => {
@@ -85,6 +107,7 @@ function WorkdayRow({
     return photo ? [photo] : [];
   });
   const record = workday.dailyRecord;
+  const pending = workday.suggestedUpdates.filter((proposal) => proposal.status === 'pending' && !proposal.dismissed);
 
   return (
     <article className={`workday-row status-${workday.status}`} data-workday={workday.dateKey}>
@@ -113,14 +136,25 @@ function WorkdayRow({
                   const photo = photoById.get(photoId);
                   return photo && !photo.voidedAt;
                 }).length;
+                const suggestions = pending.filter((proposal) => proposal.kind === 'photo-link' && proposal.punchItemId === item.id);
+                const savedProof = workday.suggestedUpdates.find((proposal) =>
+                  proposal.kind === 'photo-link' && proposal.punchItemId === item.id &&
+                  proposal.status === 'applied' && item.photoIds.includes(proposal.photoId));
+                const savedPhoto = savedProof?.kind === 'photo-link' ? photoById.get(savedProof.photoId) : undefined;
                 return (
-                  <li key={item.id} data-work-item={item.id}>
+                  <li key={item.id} data-work-item={item.id} className={proofCount === 0 && !item.proofException ? 'ledger-gap' : undefined}>
                     <span>{item.text}</span>
                     <span className={proofCount > 0 ? 'workday-proof-count' : 'workday-proof-missing'}>
                       {proofCount > 0
                         ? countLabel(proofCount, 'proof photo')
-                        : 'Photo proof missing'}
+                        : item.proofException ? `No-photo reason: ${item.proofException.reason}` : 'Photo proof missing'}
                     </span>
+                    {suggestions.map((proposal) => (
+                      <LedgerSuggestion key={proposal.id} proposal={proposal}
+                        photo={proposal.kind === 'photo-link' ? photoById.get(proposal.photoId) : undefined}
+                        target={item.text} onReview={onReviewProposal} />
+                    ))}
+                    {savedPhoto && !savedPhoto.voidedAt ? <div className="ledger-saved-proof"><LedgerPhoto photo={savedPhoto} /><span>Saved proof</span></div> : null}
                   </li>
                 );
               })}
@@ -155,6 +189,9 @@ function WorkdayRow({
           ) : (
             <p className="workday-missing">Daily record missing</p>
           )}
+          {pending.filter((proposal) => proposal.kind === 'daily-log').map((proposal) => (
+            <LedgerSuggestion key={proposal.id} proposal={proposal} target={`daily record on ${formatDate(workday.dateKey)}`} onReview={onReviewProposal} />
+          ))}
         </section>
       </div>
 
@@ -178,11 +215,13 @@ export function WorkdayLedger({
   photos,
   phase,
   checkedAt,
+  passedPhotoCount,
   filter,
   loading,
   onFilterChange,
   onOpenWorkday,
   onOpenReview,
+  onReviewProposal,
   onOpenPacket,
   onOpenView,
   onEditProject,
@@ -194,9 +233,23 @@ export function WorkdayLedger({
   const completedCount = workdays.reduce((total, day) => total + day.completedItems.length, 0);
   const photoById = new Map(photos.map((photo) => [photo.id, photo]));
   const primaryOpensPacket = phase === 'ready';
+  const pending = workdays.flatMap((day) => day.suggestedUpdates.filter((proposal) => proposal.status === 'pending' && !proposal.dismissed));
+  const firstPendingId = pending[0]?.id;
+  const previousPendingId = useRef(firstPendingId);
+  useEffect(() => {
+    const arrived = firstPendingId && firstPendingId !== previousPendingId.current;
+    previousPendingId.current = firstPendingId;
+    if (arrived) {
+      onFilterChange('all');
+      requestAnimationFrame(() => {
+        document.getElementById(`suggestion-${firstPendingId}`)?.closest('.workday-row')?.scrollIntoView({ block: 'start' });
+      });
+    }
+  }, [firstPendingId, onFilterChange]);
+  const showReviewBar = pending.length > 0 || phase !== 'not-checked';
 
   return (
-    <div className="workday-ledger">
+    <div className={`workday-ledger${showReviewBar ? ' has-review-bar' : ''}`}>
       <header className={`project-ledger-head phase-${phase}`}>
         <div className="project-ledger-title">
           <span className="section-label">Workday Ledger</span>
@@ -206,7 +259,7 @@ export function WorkdayLedger({
         </div>
 
         <div className="project-ledger-state">
-          <span className="project-status-label">{HANDOFF_STATUS_LABELS[phase]}</span>
+          <span className="project-status-label" aria-live="polite">{HANDOFF_STATUS_LABELS[phase]}</span>
           <button
             id="handoff-review-toggle"
             type="button"
@@ -239,6 +292,35 @@ export function WorkdayLedger({
           <button type="button" onClick={onEditProject}>Project settings</button>
         </nav>
       </header>
+
+      {showReviewBar ? (
+        <section className={`ledger-review-bar phase-${phase}`} aria-label="Project review">
+          <div className="ledger-review-bar-head">
+            <div role="status">
+              <strong>{pending.length > 0 ? countLabel(pending.length, 'suggestion ready to review', 'suggestions ready to review') : HANDOFF_STATUS_LABELS[phase]}</strong>
+              <span>{pending.length > 0 ? 'Nothing is saved until you approve it.' : phase === 'checking' ? 'Checking the job record.' : passedPhotoCount !== undefined ? countLabel(passedPhotoCount, 'photo passed', 'photos passed') : 'Open the review for details.'}</span>
+            </div>
+            <button type="button" className="btn btn-primary" disabled={phase === 'checking'}
+              onClick={() => firstPendingId ? onReviewProposal?.(firstPendingId) : primaryOpensPacket ? onOpenPacket() : onOpenReview()}>
+              {pending.length > 0 ? 'Review suggestions' : HANDOFF_ACTION_LABELS[phase]}
+            </button>
+          </div>
+          {pending.length > 0 ? (
+            <nav className="ledger-suggestion-links" aria-label="Jump to suggestion">
+              {pending.map((proposal, index) => (
+                <button key={proposal.id} type="button" onClick={() => {
+                  onFilterChange('all');
+                  requestAnimationFrame(() => {
+                    const target = document.getElementById(`suggestion-${proposal.id}`);
+                    target?.scrollIntoView({ block: 'center' });
+                    target?.focus({ preventScroll: true });
+                  });
+                }}>{index + 1}. {proposal.kind === 'photo-link' ? proposal.punchItemLabel : `Daily record · ${formatDate(proposal.logDate)}`}</button>
+              ))}
+            </nav>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className="ledger-toolbar">
         <div className="segmented ledger-filters" aria-label="Workday filter">
@@ -282,6 +364,7 @@ export function WorkdayLedger({
             key={workday.dateKey}
             workday={workday}
             photoById={photoById}
+            onReviewProposal={onReviewProposal}
             onOpen={onOpenWorkday ? () => onOpenWorkday(workday.dateKey) : undefined}
           />
         ))}

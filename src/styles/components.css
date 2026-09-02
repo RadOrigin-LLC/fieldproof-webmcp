@@ -513,6 +513,7 @@
   border-radius: 12px;
   background: var(--paper-raised);
   box-shadow: 0 4px 14px rgb(26 33 41 / 0.045);
+  scroll-margin-top: 16px;
 }
 .workday-row.status-complete {
   border-left-color: var(--done);
@@ -674,6 +675,138 @@
 .workday-open {
   justify-self: end;
   min-width: 150px;
+}
+.workday-work li.ledger-gap {
+  padding: 10px;
+  border-left: 3px solid var(--open);
+  background: var(--seal-soft);
+}
+.ledger-suggestion {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--blueprint);
+  border-radius: var(--radius-sm);
+  background: var(--paper-raised);
+  scroll-margin-block: 24px 180px;
+}
+.ledger-suggestion-label {
+  color: var(--blueprint);
+  font-size: var(--text-sm);
+}
+.ledger-suggestion:has(.ledger-photo) {
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: start;
+}
+.ledger-suggestion:has(.ledger-photo) .ledger-suggestion-label {
+  grid-column: 1 / -1;
+}
+.ledger-suggestion .ledger-photo {
+  grid-row: span 2;
+  width: 96px;
+}
+.ledger-suggestion p {
+  font-size: var(--text-sm);
+}
+.workday-daily .ledger-suggestion p {
+  display: block;
+  white-space: pre-wrap;
+  overflow: visible;
+}
+.ledger-suggestion .btn {
+  justify-self: start;
+}
+.ledger-saved-proof {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  color: var(--done);
+  font-size: var(--text-sm);
+}
+.has-review-bar {
+  padding-bottom: 170px;
+}
+.ledger-review-bar {
+  position: fixed;
+  z-index: 25;
+  right: 16px;
+  left: 16px;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-top: 3px solid var(--blueprint);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  box-shadow: 0 -6px 24px rgb(26 33 41 / 0.12);
+}
+.ledger-review-bar.phase-ready {
+  border-top-color: var(--done);
+}
+.ledger-review-bar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ledger-review-bar-head > div {
+  display: grid;
+  gap: 3px;
+}
+.ledger-review-bar-head span {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+.ledger-suggestion-links {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+.ledger-suggestion-links button {
+  flex: 0 0 auto;
+  max-width: 260px;
+  min-height: var(--tap);
+  padding: 8px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--blueprint-soft);
+  color: var(--blueprint);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.review-open .ledger-review-bar {
+  display: none;
+}
+@media (min-width: 900px) {
+  .ledger-review-bar {
+    left: 228px;
+    right: 28px;
+    bottom: 20px;
+  }
+}
+@media (max-width: 640px) {
+  .ledger-review-bar-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .has-review-bar {
+    padding-bottom: 230px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ledger-suggestion {
+    animation: ledger-suggestion-arrive 250ms ease-out;
+  }
+  @keyframes ledger-suggestion-arrive {
+    from { opacity: 0.3; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
 .ledger-message,
 .empty-ledger {
@@ -1534,7 +1667,22 @@
   align-self: flex-end;
 }
 .closeout-save-bar {
-  margin-top: 10px;
+  position: sticky;
+  top: 44px;
+  z-index: 1;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-raised);
+}
+.closeout-proposal {
+  scroll-margin-top: 150px;
+}
+.closeout-activity > summary {
+  padding: 10px 0;
+  font-weight: 600;
+  cursor: pointer;
 }
 .closeout-save-bar > span {
   color: var(--ink-soft);

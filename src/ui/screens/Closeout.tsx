@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CloseoutFinding, CloseoutProposal } from '../../domain/closeout.ts';
 import type { Photo, Project, PunchItem } from '../../domain/types.ts';
 import { closeoutService, closeoutSessions } from '../../data/closeoutClient.ts';
@@ -22,6 +22,7 @@ type ProposalFacts = {
 };
 
 type CloseoutViewProps = {
+  focusProposalId?: string;
   projectName: string;
   session: ProjectCloseoutSession;
   findingLabels: Record<string, string>;
@@ -185,6 +186,7 @@ function FindingGroup({
 }
 
 export function CloseoutView({
+  focusProposalId,
   projectName,
   session,
   findingLabels,
@@ -219,6 +221,12 @@ export function CloseoutView({
   const selectedCount = visibleProposals.filter(
     (proposal) => proposal.status === 'pending' && proposal.selected,
   ).length;
+  useEffect(() => {
+    if (!focusProposalId) return;
+    const target = document.getElementById(`review-${focusProposalId}`);
+    target?.scrollIntoView({ block: 'start' });
+    target?.focus({ preventScroll: true });
+  }, [focusProposalId]);
 
   return (
     <div className="closeout-screen">
@@ -314,6 +322,15 @@ export function CloseoutView({
         <section className="closeout-group closeout-proposals">
           <h3>Suggested updates</h3>
           <p className="proof-help">Review each update. FieldProof saves only the ones you select.</p>
+          {visibleProposals.some((proposal) => proposal.status === 'pending') && (
+            <div className="closeout-save-bar">
+              <span aria-live="polite">{selectedCount} selected</span>
+              <button type="button" className="btn btn-primary btn-block"
+                disabled={selectedCount === 0 || applying} onClick={onApplySelected}>
+                {applying ? 'Saving selected updates…' : `Save selected updates (${selectedCount})`}
+              </button>
+            </div>
+          )}
           <div className="closeout-proposal-list">
             {visibleProposals.map((proposal) => {
               const facts = proposalFacts[proposal.id];
@@ -321,6 +338,8 @@ export function CloseoutView({
               const canDismiss = ['rejected', 'stale', 'failed'].includes(proposal.status);
               return (
                 <article
+                  id={`review-${proposal.id}`}
+                  tabIndex={-1}
                   className={`closeout-proposal status-${proposal.status}${proposal.selected ? ' is-selected' : ''}`}
                   data-proposal-card={proposal.id}
                   key={proposal.id}
@@ -446,27 +465,12 @@ export function CloseoutView({
               );
             })}
           </div>
-          {visibleProposals.some((proposal) => proposal.status === 'pending') && (
-            <div className="closeout-save-bar">
-              <span aria-live="polite">{selectedCount} selected</span>
-              <button
-                type="button"
-                className="btn btn-primary btn-block"
-                disabled={selectedCount === 0 || applying}
-                onClick={onApplySelected}
-              >
-                {applying
-                  ? 'Saving selected updates…'
-                  : `Save selected updates (${selectedCount})`}
-              </button>
-            </div>
-          )}
         </section>
       )}
 
       {session.activity.length > 0 && (
-        <section className="closeout-group closeout-activity">
-          <h3>Review history</h3>
+        <details className="closeout-group closeout-activity">
+          <summary>Review history</summary>
           <div className="closeout-activity-list">
             {session.activity
               .slice(-12)
@@ -485,7 +489,7 @@ export function CloseoutView({
                 </div>
               ))}
           </div>
-        </section>
+        </details>
       )}
 
       {audit && ready && blockers.length === 0 && warnings.length === 0 && (
@@ -507,12 +511,14 @@ export function CloseoutView({
 }
 
 export function Closeout({
+  focusProposalId,
   project,
   photos,
   punchItems,
   onOpenFinding,
   onOpenPacket,
 }: {
+  focusProposalId?: string;
   project: Project;
   photos: Photo[];
   punchItems: PunchItem[];
@@ -638,6 +644,7 @@ export function Closeout({
 
   return (
     <CloseoutView
+      focusProposalId={focusProposalId}
       projectName={project.name}
       session={session}
       findingLabels={findingLabels}

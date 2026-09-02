@@ -88,7 +88,7 @@ export function ProjectDetail() {
   };
 
   navigationRef.current = {
-    openReview: () => setQuery({ kind: 'open-review' }),
+    openReview: () => setQuery({ kind: 'close-view' }),
     openPacket: () => {
       if (project?.id) navigate(`/packet/${project.id}`);
     },
@@ -192,6 +192,7 @@ export function ProjectDetail() {
   const closeReview = () => setQuery({ kind: 'close-review' }, true);
   const reviewContent = (
     <Closeout
+      focusProposalId={query.focus}
       project={project}
       photos={photos ?? []}
       punchItems={punch ?? []}
@@ -220,10 +221,12 @@ export function ProjectDetail() {
             photos={photos ?? []}
             phase={session.phase}
             checkedAt={session.audit?.checkedAt}
+            passedPhotoCount={session.verification?.summary.pass}
             filter={filter}
             loading={ledgerLoading}
             onFilterChange={setFilter}
             onOpenWorkday={(day) => setQuery({ kind: 'open-day', day })}
+            onReviewProposal={(proposalId) => setQuery({ kind: 'open-review', focus: proposalId })}
             onOpenReview={() => {
               setQuery({ kind: 'open-review' });
               if (startsHandoffReview(session.phase)) {
@@ -283,6 +286,7 @@ export function ProjectDetail() {
       {query.review && reviewSheet ? (
         <Sheet
           title="Handoff Review"
+          initialFocusId={query.focus ? `review-${query.focus}` : undefined}
           fullHeightOnMobile
           returnFocusId="handoff-review-toggle"
           onClose={closeReview}

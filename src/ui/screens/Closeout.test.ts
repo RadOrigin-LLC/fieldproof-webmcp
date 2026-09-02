@@ -155,6 +155,18 @@ function renderCloseout(session: ProjectCloseoutSession, agentAvailable = false)
 }
 
 describe('CloseoutView', () => {
+  it('keeps save controls ahead of suggestion cards and history collapsed', () => {
+    const html = renderCloseout({ phase: 'needs-attention', proposals: mapleProposals(), activity: [{
+      id: 'activity-1', projectId: 'project-1', action: 'stage_photo_link',
+      outcome: 'success', occurredAt: '2025-05-15T17:00:00', detail: 'Suggestion prepared.',
+    }] });
+    expect(html.indexOf('Save selected updates')).toBeLessThan(html.indexOf('data-proposal-card='));
+    expect(html).toContain('id="review-proposal-fronts"');
+    expect(html).toContain('<details class="closeout-group closeout-activity">');
+    expect(html).toContain('<summary>Review history</summary>');
+    expect(html).toMatch(/disabled=""[^>]*>Save selected updates \(0\)/);
+  });
+
   it('explains the handoff check when WebMCP is unavailable', () => {
     const html = renderCloseout({ phase: 'not-checked', proposals: [], activity: [] });
 

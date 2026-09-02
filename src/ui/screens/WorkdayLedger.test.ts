@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import type { CloseoutPhase } from '../../domain/closeout.ts';
+import type { CloseoutPhase, CloseoutProposal } from '../../domain/closeout.ts';
 import type { Photo } from '../../domain/types.ts';
 import type { WorkdayViewModel } from '../../domain/workdays.ts';
 import { HANDOFF_ACTION_LABELS, HANDOFF_STATUS_LABELS } from '../handoffLabels.ts';
@@ -150,6 +150,60 @@ function renderLedger(
 }
 
 describe('WorkdayLedger', () => {
+  it('places pending suggestions at their work item and daily record, with direct review targets', () => {
+    const base = {
+      projectId: 'project-1', createdAt: '2025-05-15T17:00:00',
+      status: 'pending' as const, selected: false, dismissed: false,
+      reason: 'Matches the saved work.', sourceFingerprint: 'source',
+    };
+    const proposals: CloseoutProposal[] = [
+      { ...base, kind: 'photo-link', id: 'fronts', punchItemId: 'msk25w08',
+        punchItemLabel: 'Install cabinet fronts and hardware', workdayDate: '2025-05-15',
+        photoId: 'msk25p13', expectedPunchUpdatedAt: '2025-05-15T16:00:00', expectedPhotoIdentity: 'photo' },
+      { ...base, kind: 'daily-log', id: 'daily', logDate: '2025-05-15',
+        body: 'Installed the fronts and cleaned the work area.', expectedLogAbsent: true,
+        sourcePhotoIds: ['msk25p13'], sourceWorkItemIds: ['msk25w08'] },
+    ];
+    const html = renderLedger('needs-attention', 'all', [
+      workday('2025-05-15', 'needs-attention', { suggestedUpdates: proposals }),
+    ]);
+    const fronts = html.slice(html.indexOf('data-work-item="msk25w08"'), html.indexOf('data-work-item="msk25w09"'));
+    const daily = html.slice(html.indexOf('aria-label="Daily record"'));
+    expect(fronts).toContain('data-ledger-photo="msk25p13"');
+    expect(fronts).toContain('data-suggestion="fronts"');
+    expect(fronts).toContain('Review suggestion for Install cabinet fronts and hardware');
+    expect(daily).toContain('data-suggestion="daily"');
+    expect(daily).toContain('Installed the fronts and cleaned the work area.');
+    expect(html).toContain('2 suggestions ready to review');
+    expect(html).toContain('Photo proof missing');
+    expect(html).not.toContain('Selected for saving');
+
+    const saved = renderLedger('ready', 'all', [{
+      ...savedMay15Workday(), status: 'complete',
+      suggestedUpdates: proposals.map((proposal) => ({ ...proposal, status: 'applied' })),
+    }]);
+    expect(saved).not.toContain('data-suggestion=');
+    expect(saved).not.toContain('suggestions ready to review');
+    expect(saved).toContain('Ready for handoff');
+    expect(saved).toContain('data-ledger-photo="msk25p13"');
+  });
+
+  it('keeps hidden and outdated suggestions out of the pending review bar', () => {
+    const proposal = {
+      kind: 'daily-log' as const, id: 'daily', projectId: 'project-1',
+      createdAt: '2025-05-15T17:00:00', status: 'stale' as const,
+      selected: false, dismissed: false, reason: 'Review again.', sourceFingerprint: 'old',
+      logDate: '2025-05-15', body: 'Old draft.', expectedLogAbsent: true as const,
+      sourcePhotoIds: [], sourceWorkItemIds: [],
+    };
+    const html = renderLedger('check-again', 'all', [workday('2025-05-15', 'check-again', {
+      suggestedUpdates: [proposal, { ...proposal, id: 'hidden', status: 'pending', dismissed: true }],
+    })]);
+    expect(html).not.toContain('data-suggestion=');
+    expect(html).not.toContain('suggestions ready to review');
+    expect(html).not.toContain('Old draft.');
+  });
+
   it('shows the Maple Street job facts and oldest workday first', () => {
     const html = renderLedger();
 
