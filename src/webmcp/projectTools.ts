@@ -214,7 +214,9 @@ function auditToolResult(
     candidates,
     daily_log_contexts: dailyLogContexts,
   };
-  const message = 'Review finished. Full details stay in Handoff Review.';
+  const message = result.phase === 'ready'
+    ? 'Ready for handoff. The packet is open for your review. Nothing has been sent.'
+    : 'Review finished. Full details stay in Handoff Review.';
   const serialize = () =>
     JSON.stringify({
       ok: true,
@@ -441,7 +443,7 @@ export function createReadOnlyProjectTools({
     name: 'audit_project_closeout',
     title: 'Check handoff readiness',
     description:
-      'Check the open project for unfinished work, missing proof, and blank daily logs. Run the photo check first. Full notes stay on the page.',
+      'Check the open project for unfinished work, missing proof, and blank daily logs. Run the photo check first. When ready with no warnings, opens the handoff packet for the user to review. Does not send anything.',
     inputSchema: EMPTY_INPUT_SCHEMA,
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     execute: async (input, options) => {
@@ -455,7 +457,10 @@ export function createReadOnlyProjectTools({
           combineSignals(options?.signal, routeSignal),
         );
         if (routeSignal.aborted) return inactiveResult();
-        recordActivity('audit_project_closeout', 'success', 'Handoff check finished.');
+        if (result.phase === 'ready') openPacket();
+        recordActivity('audit_project_closeout', 'success', result.phase === 'ready'
+          ? 'Ready for handoff. Packet opened for review.'
+          : 'Handoff check finished.');
         return auditToolResult(projectId, projectName, result);
       } catch (error) {
         return finishError('audit_project_closeout', error);

@@ -514,6 +514,27 @@ describe('project tools', () => {
     await execution;
   });
 
+  it.each([
+    { phase: 'ready' as const, blockerCount: 0, warningCount: 0, opensPacket: true },
+    { phase: 'ready-with-warnings' as const, blockerCount: 0, warningCount: 1, opensPacket: false },
+    { phase: 'needs-attention' as const, blockerCount: 1, warningCount: 0, opensPacket: false },
+  ])('opens the packet after an audit only when ready: $phase', async ({ phase, blockerCount, warningCount, opensPacket }) => {
+    const context = createToolContext({
+      service: createToolService({
+        auditProjectCloseout: vi.fn(async () => ({
+          ...audit(blockerCount + warningCount), phase, blockerCount, warningCount,
+        })),
+      }),
+    });
+    const tool = context.toolset.find((item) => item.name === 'audit_project_closeout')!;
+
+    const result = await execute(tool);
+
+    expect(result.value).toMatchObject({ ok: true, code: 'audited', data: { phase } });
+    expect(context.openCloseout).toHaveBeenCalledOnce();
+    expect(context.openPacket).toHaveBeenCalledTimes(opensPacket ? 1 : 0);
+  });
+
   it('opens the packet without changing the current closeout phase', async () => {
     const context = createToolContext();
     context.sessions.setAudit('project-1', { ...audit(), phase: 'ready', blockerCount: 0, findings: [] });
