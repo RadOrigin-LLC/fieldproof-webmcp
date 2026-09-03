@@ -76,6 +76,11 @@
 }
 
 /* The shutter — the only safety-yellow element in the app. */
+.capture-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .btn-capture {
   background: var(--safety);
   color: #1a1a1a;
