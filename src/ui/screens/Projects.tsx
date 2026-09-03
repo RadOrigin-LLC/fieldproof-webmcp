@@ -88,7 +88,7 @@ export function Projects() {
   const [adding, setAdding] = useState(false);
 
   return (
-    <div>
+    <div className="projects-page">
       <header className="screen-head">
         <h1 className="screen-title">Projects</h1>
         <button type="button" className="btn btn-primary" onClick={() => setAdding(true)}>
@@ -96,17 +96,45 @@ export function Projects() {
         </button>
       </header>
 
-      <section className="demo-entry demo-entry-row">
-        <div>
-          <span className="section-label">Maple Street Kitchen sample</span>
-          <p>Its people, places, records, and photos are synthetic. Your projects stay unchanged.</p>
+      <section className="projects-intro" aria-labelledby="projects-intro-title">
+        <div className="projects-intro-copy">
+          <h2 id="projects-intro-title">
+            Finish the job.
+            <span>Get the paperwork ready.</span>
+          </h2>
+          <p>
+            FieldProof keeps job photos, completed work, and daily notes together. Ask your browser
+            agent to find missing records and prepare updates for you to review.
+          </p>
+          <div className="projects-intro-actions">
+            <DemoLoadButton
+              label="Try the demo"
+              className="btn projects-demo-button"
+              onLoaded={(projectId) => navigate(`/project/${projectId}`)}
+            />
+            <a href="#your-projects">Your projects</a>
+          </div>
+          <p className="projects-intro-note">A sample kitchen remodel. No account needed.</p>
         </div>
-        <DemoLoadButton
-          label="Open sample"
-          onLoaded={(projectId) => navigate(`/project/${projectId}`)}
+        <img
+          className="projects-intro-image"
+          src="/images/contractor-documenting-job.png"
+          alt="Illustration of a contractor photographing newly fitted kitchen cabinets."
+          width="1024"
+          height="1024"
         />
       </section>
 
+      <div className="projects-demo-guide">
+        <p>
+          Open the sample, then ask your agent: <q>Help me get this project ready for handoff.</q>
+        </p>
+        <p className="projects-demo-disclosure">
+          The demo uses fictional records and generated photos. Your projects stay unchanged.
+        </p>
+      </div>
+
+      <h2 id="your-projects" className="projects-list-title" tabIndex={-1}>Your projects</h2>
       {summaries && summaries.length === 0 ? (
         <div className="empty-state">
           <p>No projects yet.</p>
