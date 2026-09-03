@@ -437,17 +437,19 @@ function PunchList({
         </p>
       )}
       <div className="punch-add">
+        <label className="field">
+          <span>New work item</span>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') void add();
           }}
-          placeholder="Touch up paint in hallway"
-          aria-label="New punch item"
+          placeholder="e.g. Touch up paint in hallway"
         />
-        <button type="button" className="btn btn-primary" onClick={() => void add()} aria-label="Add">
-          <IconPlus />
+        </label>
+        <button type="button" className="btn btn-primary" onClick={() => void add()}>
+          <IconPlus /> Add item
         </button>
       </div>
 
@@ -478,7 +480,9 @@ function PunchList({
               className="btn btn-quiet"
               onClick={() => setEvidenceItemId(item.id)}
             >
-              Proof {item.photoIds.length}
+              {item.photoIds.length === 0
+                ? 'Link a photo'
+                : `${item.photoIds.length} linked ${item.photoIds.length === 1 ? 'photo' : 'photos'}`}
             </button>
           )}
           <button

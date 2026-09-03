@@ -221,9 +221,14 @@ function AiSection() {
     <section className="settings-group" aria-label="Writing help">
       <h2 className="section-title">Writing help</h2>
       <p className="settings-note">
-        Writing help uses your Google Gemini API key. A caption request sends the selected photo to
-        Google. A daily-record request sends your notes and the photo captions used for the draft.
-        Nothing is sent until you ask for a draft. You review every result.
+        Optional: use Google Gemini to suggest photo captions and turn rough notes into daily records.
+        Add your own Gemini API key below to enable the draft buttons. The browser agent and handoff
+        demo work without this key.
+      </p>
+      <p className="settings-note">
+        When you request a caption, the selected photo is sent to Google. For a daily record, your
+        notes and that day's photo captions are sent instead. Nothing is sent until you request a
+        draft. Review and edit it before saving.
       </p>
       {saved ? (
         <div className="settings-row">

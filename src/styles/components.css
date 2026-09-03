@@ -187,6 +187,18 @@
 }
 
 /* ---------- punch list ---------- */
+.punch-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 16px 0;
+}
+.punch-add .field {
+  flex: 1 1 240px;
+  min-width: 0;
+  margin: 0;
+}
 .punch-row {
   display: flex;
   align-items: flex-start;
@@ -371,6 +383,7 @@
   }
   .shell-main {
     margin-left: 200px;
+    width: calc(100% - 200px);
     padding-bottom: 32px;
   }
   .shell-main-project {
@@ -1304,6 +1317,26 @@
 }
 
 /* ---------- settings ---------- */
+.settings-actions,
+.storage-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.storage-panel .meta-line {
+  flex: 1 1 320px;
+  white-space: normal;
+  overflow: visible;
+}
+.settings-actions .key-input {
+  min-width: 0;
+  max-width: 100%;
+}
+.settings-note + .settings-note {
+  margin-top: 8px;
+}
 .settings-group {
   border: 1px solid var(--line);
   border-radius: var(--radius);
