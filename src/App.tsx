@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import { useSettings } from './data/useLive.ts';
 import { Shell } from './ui/Shell.tsx';
-import { Onboarding } from './ui/screens/Onboarding.tsx';
 import { Projects } from './ui/screens/Projects.tsx';
 import { ProjectDetail } from './ui/screens/ProjectDetail.tsx';
 import { Capture } from './ui/screens/Capture.tsx';
@@ -24,7 +23,6 @@ export function App() {
   }, [settings?.theme]);
 
   if (settings === undefined) return null; // Dexie still opening
-  if (!settings.onboardedAt) return <Onboarding />;
 
   return (
     <Routes>
